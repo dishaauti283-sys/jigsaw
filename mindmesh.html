@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corlesce — F1 Racing Puzzle</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,700;0,900;1,900&family=Rajdhani:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --red: #e10600;
+            --red-glow: rgba(225, 6, 0, 0.4);
+            --bg: #080808;
+            --surface: #111111;
+            --surface2: #181818;
+            --border: #2a2a2a;
+            --text: #f0f0f0;
+            --muted: #888;
+            --gold: #ffd700;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--red);
+            border-radius: 2px;
+        }
+
+        /* ── NAVBAR ── */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 999;
+            padding: 22px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.4s ease;
+        }
+
+        nav.scrolled {
+            background: rgba(8, 8, 8, 0.97);
+            padding: 14px 60px;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+            font-style: italic;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 1px;
+        }
+
+        .logo-icon {
+            font-size: 1.4rem;
+        }
+
+        .logo em {
+            color: var(--red);
+            font-style: normal;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 36px;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--red);
+        }
+
+        .nav-cta {
+            background: var(--red);
+            color: var(--text) !important;
+            padding: 8px 22px;
+            clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+        }
+
+        .nav-cta:hover {
+            background: #ff1a1a;
+            color: var(--text) !important;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            height: 100vh;
+            background:
+                linear-gradient(to bottom, rgba(8, 8, 8, 0.3) 0%, rgba(8, 8, 8, 0.75) 60%, rgba(8, 8, 8, 1) 100%),
+                url('https://images.unsplash.com/photo-1541580621-07ecd0015fe8?q=80&w=2000&auto=format&fit=crop') center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-stripe {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: repeating-linear-gradient(90deg, var(--red) 0, var(--red) 30px, #fff 30px, #fff 60px);
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: var(--red);
+            color: #fff;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            padding: 6px 20px;
+            margin-bottom: 24px;
+            clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+        }
+
+        .hero h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(3.5rem, 10vw, 8rem);
+            font-weight: 900;
+            font-style: italic;
+            line-height: 0.9;
+            letter-spacing: -1px;
+            text-shadow: 0 0 60px rgba(225, 6, 0, 0.3);
+        }
+
+        .hero h1 .line1 {
+            color: var(--red);
+            display: block;
+        }
+
+        .hero h1 .line2 {
+            color: var(--text);
+            display: block;
+        }
+
+        .hero-sub {
+            font-size: 1.1rem;
+            color: var(--muted);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin: 24px 0 44px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: var(--red);
+            color: #fff;
+            padding: 16px 44px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-style: italic;
+            letter-spacing: 2px;
+            border: none;
+            cursor: pointer;
+            clip-path: polygon(14px 0%, 100% 0%, calc(100% - 14px) 100%, 0% 100%);
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-primary:hover {
+            background: #ff1a1a;
+            box-shadow: 0 0 30px var(--red-glow);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            padding: 16px 44px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-style: italic;
+            letter-spacing: 2px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            clip-path: polygon(14px 0%, 100% 0%, calc(100% - 14px) 100%, 0% 100%);
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        /* ── SECTION BASE ── */
+        section {
+            padding: 110px 60px;
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 5px;
+            color: var(--red);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: clamp(2.2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            font-style: italic;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .section-title em {
+            color: var(--red);
+            font-style: normal;
+        }
+
+        .divider {
+            width: 60px;
+            height: 4px;
+            background: var(--red);
+            margin: 0 auto 60px;
+        }
+
+        .divider.left {
+            margin: 0 0 60px;
+        }
+
+        /* ── ABOUT ── */
+        .about {
+            background: var(--bg);
+        }
+
+        .about-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .about-text p {
+            color: var(--muted);
+            font-size: 1.05rem;
+            line-height: 1.9;
+            margin-bottom: 20px;
+        }
+
+        .about-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+            background: var(--border);
+        }
+
+        .stat-box {
+            background: var(--surface);
+            padding: 36px 28px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            font-style: italic;
+            color: var(--red);
+            line-height: 1;
+        }
+
+        .stat-lbl {
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+
+        /* ── FEATURES ── */
+        .features {
+            background: var(--surface);
+        }
+
+        .features-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2px;
+            background: var(--border);
+        }
+
+        .feature-card {
+            background: var(--surface2);
+            padding: 44px 36px;
+            border-top: 3px solid transparent;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .feature-card.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        .feature-card:hover {
+            border-top-color: var(--red);
+        }
+
+        .feature-icon {
+            font-size: 2.6rem;
+            margin-bottom: 22px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-style: italic;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+
+        .feature-card p {
+            color: var(--muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* ── PUZZLE SECTION ── */
+        .puzzle-section {
+            background: var(--bg);
+        }
+
+        .puzzle-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .puzzle-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 36px;
+            align-items: center;
+        }
+
+        .puzzle-controls label {
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-right: 6px;
+        }
+
+        .puzzle-controls select {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            appearance: none;
+            outline: none;
+        }
+
+        .puzzle-controls select:focus {
+            border-color: var(--red);
+        }
+
+        .ctrl-btn {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px 22px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            font-style: italic;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .ctrl-btn:hover {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .ctrl-btn.active {
+            background: var(--red);
+            border-color: var(--red);
+            color: #fff;
+        }
+
+        .puzzle-stage {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            display: inline-block;
+            padding: 20px;
+            margin: 0 auto;
+        }
+
+        .puzzle-hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .hud-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-width: 80px;
+        }
+
+        .hud-lbl {
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .hud-val {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .hud-val.red {
+            color: var(--red);
+        }
+
+        #puzzleCanvas {
+            display: block;
+            cursor: grab;
+            max-width: 100%;
+        }
+
+        #puzzleCanvas:active {
+            cursor: grabbing;
+        }
+
+        .progress-bar-wrap {
+            margin-top: 14px;
+            background: var(--surface2);
+            height: 6px;
+            border-radius: 0;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--red);
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+
+        /* Win overlay */
+        .win-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(8, 8, 8, 0.92);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            z-index: 10;
+        }
+
+        .win-overlay.show {
+            display: flex;
+        }
+
+        .win-trophy {
+            font-size: 5rem;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.12);
+            }
+        }
+
+        .win-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            font-style: italic;
+            color: var(--gold);
+        }
+
+        .win-time {
+            font-size: 1.4rem;
+            color: var(--muted);
+            letter-spacing: 3px;
+        }
+
+        /* Image picker */
+        .image-picker {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .img-thumb {
+            width: 80px;
+            height: 54px;
+            object-fit: cover;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0.6;
+        }
+
+        .img-thumb:hover,
+        .img-thumb.active {
+            border-color: var(--red);
+            opacity: 1;
+        }
+
+        /* ── LEADERBOARD ── */
+        .leaderboard {
+            background: var(--surface);
+        }
+
+        .lb-inner {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            background: var(--bg);
+            border-bottom: 2px solid var(--red);
+        }
+
+        th {
+            padding: 16px 20px;
+            text-align: left;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: var(--red);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: var(--surface2);
+        }
+
+        td {
+            padding: 18px 20px;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .rank-1 {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .rank-2 {
+            color: #c0c0c0;
+            font-weight: 700;
+        }
+
+        .rank-3 {
+            color: #cd7f32;
+            font-weight: 700;
+        }
+
+        .medal {
+            margin-right: 6px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: var(--red);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            padding: 3px 10px;
+            text-transform: uppercase;
+            clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            background: #050505;
+            border-top: 1px solid var(--border);
+            padding: 60px;
+        }
+
+        .footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+
+        .footer-left {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .footer-right {
+            display: flex;
+            gap: 80px;
+            flex-wrap: wrap;
+        }
+
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-col-title {
+            color: var(--text);
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .footer-logo {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            font-style: italic;
+        }
+
+        .footer-logo em {
+            color: var(--red);
+            font-style: normal;
+        }
+
+        .footer-col a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: color 0.2s;
+        }
+
+        .footer-col a:hover {
+            color: var(--red);
+        }
+
+        .copyright {
+            color: #444;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            nav {
+                padding: 18px 24px;
+            }
+
+            nav.scrolled {
+                padding: 12px 24px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            section {
+                padding: 80px 24px;
+            }
+
+            .about-inner {
+                grid-template-columns: 1fr;
+                gap: 50px;
+            }
+
+            footer {
+                padding: 40px 24px;
+            }
+
+            .footer-inner {
+                flex-direction: column;
+                text-align: center;
+                align-items: center;
+                gap: 50px;
+            }
+
+            .footer-left, .footer-right, .footer-col {
+                align-items: center;
+                text-align: center;
+            }
+
+            .footer-right {
+                flex-direction: column;
+                gap: 40px;
+            }
+        }
+
+        /* ── ANIMATED ENTRANCE ── */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* Racing stripe background for features section heading */
+        .features-head {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── NAVBAR ── -->
+    <nav id="navbar">
+        <a href="#home" class="logo"><span class="logo-icon">🧩</span> Cor<em>lesce</em></a>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#play">Play</a></li>
+            <li><a href="#leaderboard">Leaderboard</a></li>
+            <li><a href="#contact" class="nav-cta">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- ── HERO ── -->
+    <header id="home" class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">Season 2026 · Now Live</div>
+            <h1>
+                <span class="line1">F1 Racing</span>
+                <span class="line2">Puzzle</span>
+            </h1>
+            <p class="hero-sub">Piece by piece, peace of mind.</p>
+            <div class="btn-group">
+                <button class="btn-primary"
+                    onclick="document.getElementById('play').scrollIntoView({behavior:'smooth'})">▶ Play Now</button>
+                <button class="btn-secondary"
+                    onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">Learn More</button>
+            </div>
+        </div>
+        <div class="hero-stripe"></div>
+    </header>
+
+    <!-- ── ABOUT ── -->
+    <section id="about" class="about">
+        <div class="about-inner">
+            <div class="about-text fade-up">
+                <p class="section-label">About the Game</p>
+                <h2 class="section-title">Where Speed Meets <em>Strategy</em></h2>
+                <div class="divider left"></div>
+                <p>Corlesce fuses the high-octane world of Formula 1 with the calm mental workout of jigsaw puzzles.
+                    Reconstruct legendary race moments, iconic circuits, and legendary machines — one piece at a time.
+                </p>
+                <p>Whether you're a die-hard motorsport fan or a casual puzzle solver, Corlesce delivers a uniquely
+                    satisfying challenge. Shift your brain into top gear and set a new lap record.</p>
+            </div>
+            <div class="about-stats fade-up">
+                <div class="stat-box">
+                    <div class="stat-num">50+</div>
+                    <div class="stat-lbl">Unique Puzzles</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">4</div>
+                    <div class="stat-lbl">Difficulty Tiers</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">24</div>
+                    <div class="stat-lbl">F1 Circuits</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">1M+</div>
+                    <div class="stat-lbl">Pieces Placed</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── FEATURES ── -->
+    <section id="features" class="features">
+        <div class="features-inner">
+            <div class="features-head fade-up">
+                <p class="section-label">What's Inside</p>
+                <h2 class="section-title">Game <em>Features</em></h2>
+                <div class="divider"></div>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">⚙️</span>
+                    <h3>4 Difficulty Levels</h3>
+                    <p>From a 9-piece warm-up lap to a brutal 500-piece endurance race. Every level is a new challenge.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🏎️</span>
+                    <h3>F1 Themed Images</h3>
+                    <p>High-resolution imagery spanning decades — iconic cars, legendary circuits, unforgettable
+                        moments.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">⏱️</span>
+                    <h3>Live Timer & Stats</h3>
+                    <p>Race the clock in real-time. Every second counts. Beat your personal best and climb the
+                        leaderboard.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🔀</span>
+                    <h3>Shuffle & Restart</h3>
+                    <p>Re-scramble any time, swap puzzle images mid-game, or start fresh with a brand new layout.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🏆</span>
+                    <h3>Global Leaderboard</h3>
+                    <p>Your best completion times are tracked and ranked against racers from around the world.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📱</span>
+                    <h3>Mobile Ready</h3>
+                    <p>Built for every screen. Race on your phone, tablet, or desktop — no installation required.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── PUZZLE GAME ── -->
+    <section id="play" class="puzzle-section">
+        <div class="puzzle-inner">
+            <div class="fade-up">
+                <p class="section-label">Interactive</p>
+                <h2 class="section-title">Play the <em>Puzzle</em></h2>
+                <div class="divider"></div>
+            </div>
+
+            <!-- Image Picker -->
+            <div class="image-picker fade-up" id="imagePicker"></div>
+
+            <!-- Controls -->
+            <div class="puzzle-controls fade-up">
+                <label>Grid:</label>
+                <select id="gridSelect">
+                    <option value="20x20">400 pcs (20×20)</option>
+                    <option value="30x20" selected>600 pcs (30×20)</option>
+                    <option value="32x25">800 pcs (32×25)</option>
+                    <option value="40x25">1000 pcs (40×25)</option>
+                </select>
+                <button class="ctrl-btn" id="shuffleBtn">⟳ Shuffle</button>
+                <button class="ctrl-btn" id="peekBtn">👁 Peek</button>
+                <button class="ctrl-btn" id="solveBtn">✔ Solve</button>
+            </div>
+
+            <!-- Puzzle Stage -->
+            <div class="puzzle-stage">
+                <div class="puzzle-hud">
+                    <div class="hud-item">
+                        <span class="hud-lbl">Time</span>
+                        <span class="hud-val red" id="hudTime">00:00</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-lbl">Moves</span>
+                        <span class="hud-val" id="hudMoves">0</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-lbl">Pieces</span>
+                        <span class="hud-val" id="hudPieces">0 / 0</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-lbl">Progress</span>
+                        <span class="hud-val" id="hudPct">0%</span>
+                    </div>
+                </div>
+
+                <canvas id="puzzleCanvas"></canvas>
+
+                <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill" id="progressFill"></div>
+                </div>
+
+                <!-- Win Screen -->
+                <div class="win-overlay" id="winOverlay">
+                    <div class="win-trophy">🏆</div>
+                    <div class="win-title">Race Complete!</div>
+                    <div class="win-time" id="winTime">Time: 00:00</div>
+                    <button class="btn-primary" onclick="initPuzzle()">▶ Play Again</button>
+                </div>
+            </div>
+            <p style="color:var(--muted);font-size:0.85rem;margin-top:14px;letter-spacing:1px;">
+                Click a piece to select it (red highlight), then click another piece to swap them.
+            </p>
+        </div>
+    </section>
+
+    <!-- ── LEADERBOARD ── -->
+    <section id="leaderboard" class="leaderboard">
+        <div class="lb-inner">
+            <div class="fade-up" style="text-align:center">
+                <p class="section-label">Top Racers</p>
+                <h2 class="section-title">Global <em>Leaderboard</em></h2>
+                <div class="divider"></div>
+            </div>
+            <table class="fade-up">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Puzzle</th>
+                        <th>Grid</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="rank-1"><span class="medal">🥇</span>1</td>
+                        <td>MaxV_33</td>
+                        <td>Monaco Grand Prix</td>
+                        <td>6×6</td>
+                        <td>0:12:04</td>
+                        <td><span class="tag">Champion</span></td>
+                    </tr>
+                    <tr>
+                        <td class="rank-2"><span class="medal">🥈</span>2</td>
+                        <td>Lewis_44</td>
+                        <td>Silverstone Circuit</td>
+                        <td>6×6</td>
+                        <td>0:13:58</td>
+                        <td><span class="tag">Pro</span></td>
+                    </tr>
+                    <tr>
+                        <td class="rank-3"><span class="medal">🥉</span>3</td>
+                        <td>SmoothOperator</td>
+                        <td>Ferrari SF-24</td>
+                        <td>5×5</td>
+                        <td>0:09:30</td>
+                        <td><span class="tag">Pro</span></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>PapayaRules</td>
+                        <td>McLaren Pitstop</td>
+                        <td>5×5</td>
+                        <td>0:10:15</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Alonso_Magic</td>
+                        <td>Aston Martin AMR24</td>
+                        <td>4×4</td>
+                        <td>0:05:02</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>SchumyFan</td>
+                        <td>Monza Chicane</td>
+                        <td>4×4</td>
+                        <td>0:05:49</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer id="contact">
+        <div class="footer-inner">
+            <div class="footer-left">
+                <div class="footer-logo">🧩 Cor<em>lesce</em></div>
+                <p class="copyright">&copy; 2026 Corlesce. All rights reserved.</p>
+            </div>
+            <div class="footer-right">
+                <div class="footer-col">
+                    <p class="footer-col-title">Navigation</p>
+                    <a href="#home">Home</a>
+                    <a href="#about">About</a>
+                    <a href="#features">Features</a>
+                    <a href="#play">Play</a>
+                    <a href="#leaderboard">Leaderboard</a>
+                </div>
+                <div class="footer-col">
+                    <p class="footer-col-title">Socials</p>
+                    <a href="#">X (Twitter)</a>
+                    <a href="#">Instagram</a>
+                    <a href="#">Discord</a>
+                    <a href="#">YouTube</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /* ── NAVBAR SCROLL ── */
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 60);
+        });
+
+        /* ── INTERSECTION OBSERVER (fade-up & cards) ── */
+        const io = new IntersectionObserver((entries, obs) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    obs.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-up, .feature-card').forEach(el => io.observe(el));
+
+        /* ────────────────────────────────
+           PUZZLE ENGINE
+        ──────────────────────────────── */
+        const IMAGES = [
+            { label: 'Image 1', url: './WhatsApp Image 2026-03-31 at 9.07.59 AM.jpeg' },
+            { label: 'Image 2', url: './WhatsApp Image 2026-03-31 at 9.11.47 AM.jpeg' },
+            { label: 'Image 3', url: './WhatsApp Image 2026-03-31 at 9.11.48 AM (1).jpeg' },
+            { label: 'Image 4', url: './WhatsApp Image 2026-03-31 at 9.11.48 AM.jpeg' },
+        ];
+
+        const canvas = document.getElementById('puzzleCanvas');
+        const ctx = canvas.getContext('2d');
+        const CSIZE = Math.min(window.innerWidth < 700 ? window.innerWidth - 80 : 560, 560);
+        canvas.width = CSIZE;
+        canvas.height = CSIZE;
+
+        let gridX = 30, gridY = 20, pieces = [], selected = null, moves = 0;
+        let timerInterval = null, elapsed = 0, solved = false;
+        let activeImgIdx = 0, img = new Image();
+        let peeking = false;
+        let hTabs = [], vTabs = [];
+
+        /* Build image picker */
+        const picker = document.getElementById('imagePicker');
+        IMAGES.forEach((im, i) => {
+            const t = document.createElement('img');
+            t.src = im.url; t.className = 'img-thumb' + (i === 0 ? ' active' : '');
+            t.title = im.label;
+            t.onclick = () => {
+                activeImgIdx = i;
+                document.querySelectorAll('.img-thumb').forEach((x, j) => x.classList.toggle('active', j === i));
+                loadImageAndInit();
+            };
+            picker.appendChild(t);
+        });
+
+        function loadImageAndInit() {
+            img = new Image();
+            // img.crossOrigin = 'anonymous'; // Removed to allow local file loaded images to work
+            img.onload = initPuzzle;
+            img.onerror = () => { /* fallback: draw colour blocks */
+                img = null; initPuzzle();
+            };
+            img.src = IMAGES[activeImgIdx].url;
+        }
+
+        function initTabs() {
+            hTabs = []; vTabs = [];
+            for (let r = 0; r < gridY - 1; r++) {
+                let row = [];
+                for (let c = 0; c < gridX; c++) row.push(Math.random() > 0.5 ? 1 : -1);
+                hTabs.push(row);
+            }
+            for (let r = 0; r < gridY; r++) {
+                let row = [];
+                for (let c = 0; c < gridX - 1; c++) row.push(Math.random() > 0.5 ? 1 : -1);
+                vTabs.push(row);
+            }
+        }
+
+        function initPuzzle() {
+            clearInterval(timerInterval);
+            elapsed = 0; moves = 0; solved = false;
+            document.getElementById('winOverlay').classList.remove('show');
+            
+            const gridVal = document.getElementById('gridSelect').value;
+            const parts = gridVal.split('x');
+            gridX = parseInt(parts[0]);
+            gridY = parseInt(parts[1] || parts[0]);
+            
+            initTabs();
+            
+            // Adjust canvas height maintaining perfect square tiles
+            canvas.height = CSIZE * (gridY / gridX);
+
+            const total = gridX * gridY;
+            pieces = [];
+            for (let i = 0; i < total; i++) pieces.push(i);
+
+            // Fisher-Yates shuffle
+            for (let i = pieces.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pieces[i], pieces[j]] = [pieces[j], pieces[i]];
+            }
+            selected = null;
+            updateHUD();
+            drawBoard();
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                elapsed++;
+                document.getElementById('hudTime').textContent = fmtTime(elapsed);
+            }, 1000);
+        }
+
+        function fmtTime(s) {
+            const m = String(Math.floor(s / 60)).padStart(2, '0');
+            const sc = String(s % 60).padStart(2, '0');
+            return `${m}:${sc}`;
+        }
+
+        function drawBoard() {
+            ctx.clearRect(0, 0, CSIZE, canvas.height);
+            const ts = CSIZE / gridX;
+            
+            // Calculate central crop for the image bridging the gridX/gridY ratio
+            let offsetX = 0, offsetY = 0, s_tsX = 0, s_tsY = 0;
+            let cropW = CSIZE, cropH = canvas.height;
+            if (img) {
+                const imgRatio = img.width / img.height;
+                const gridRatio = gridX / gridY;
+                
+                if (imgRatio > gridRatio) {
+                    cropH = img.height;
+                    cropW = img.height * gridRatio;
+                    offsetX = (img.width - cropW) / 2;
+                    offsetY = 0;
+                } else {
+                    cropW = img.width;
+                    cropH = img.width / gridRatio;
+                    offsetX = 0;
+                    offsetY = (img.height - cropH) / 2;
+                }
+                s_tsX = cropW / gridX;
+                s_tsY = cropH / gridY;
+            }
+
+            if (peeking) {
+                if (img) {
+                    ctx.drawImage(img, offsetX, offsetY, cropW, cropH, 0, 0, CSIZE, canvas.height);
+                } else {
+                    drawFallback(0, 0, CSIZE, canvas.height, -1);
+                }
+                ctx.fillStyle = 'rgba(8,8,8,0.45)';
+                ctx.fillRect(0, 0, CSIZE, canvas.height);
+            }
+
+            const order = Array.from(pieces.keys()).sort((a, b) => (a === selected) ? 1 : (b === selected) ? -1 : 0);
+            order.forEach(pos => {
+                const correctIdx = pieces[pos];
+                const px = (pos % gridX) * ts;
+                const py = Math.floor(pos / gridX) * ts;
+                
+                const sx = offsetX + (correctIdx % gridX) * s_tsX;
+                const sy = offsetY + Math.floor(correctIdx / gridX) * s_tsY;
+
+                const pad = ts * 0.35;
+                const sPadX = s_tsX * 0.35;
+                const sPadY = s_tsY * 0.35;
+
+                if (!peeking) {
+                    ctx.save();
+                    drawPiecePath(ctx, px, py, ts, correctIdx);
+                    
+                    // Draw outer shadow for piece depth
+                    if (selected !== pos) {
+                        ctx.fillStyle = 'rgba(0,0,0,1)';
+                        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                        ctx.shadowBlur = Math.max(2, ts * 0.1);
+                        ctx.fill();
+                    } else {
+                        ctx.fillStyle = 'white';
+                        ctx.shadowColor = '#e10600';
+                        ctx.shadowBlur = Math.max(6, ts * 0.3);
+                        ctx.fill();
+                    }
+                    
+                    ctx.clip(); 
+                    ctx.shadowColor = 'transparent';
+
+                    if (img) {
+                        ctx.drawImage(img, 
+                            sx - sPadX, sy - sPadY, s_tsX + sPadX * 2, s_tsY + sPadY * 2, 
+                            px - pad, py - pad, ts + pad * 2, ts + pad * 2);
+                    } else {
+                        drawFallback(px - pad, py - pad, ts + pad * 2, ts + pad * 2, correctIdx);
+                    }
+
+                    // Stroke piece edge
+                    ctx.lineWidth = selected === pos ? 3 : 1;
+                    ctx.strokeStyle = selected === pos ? '#e10600' : 'rgba(0,0,0,0.7)';
+                    ctx.stroke();
+
+                    // Inner highlight 
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                    ctx.stroke();
+
+                    ctx.restore();
+
+                    // Piece number hint overlay
+                    if (ts > 20) {
+                        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+                        ctx.font = `bold ${Math.max(10, ts * 0.2)}px Barlow Condensed`;
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillText(correctIdx + 1, px + ts / 2, py + ts / 2);
+                    }
+                }
+
+                if (correctIdx === pos && !peeking) {
+                    ctx.save();
+                    drawPiecePath(ctx, px, py, ts, correctIdx);
+                    ctx.fillStyle = 'rgba(0,255,100,0.12)';
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
+        }
+
+        function drawPiecePath(ctx, x, y, ts, idx) {
+            const col = idx % gridX;
+            const row = Math.floor(idx / gridX);
+            
+            const top = row === 0 ? 0 : hTabs[row - 1][col];
+            const bottom = row === gridY - 1 ? 0 : -hTabs[row][col];
+            const left = col === 0 ? 0 : vTabs[row][col - 1];
+            const right = col === gridX - 1 ? 0 : -vTabs[row][col];
+            
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            drawJigsawEdge(ctx, x, y, x + ts, y, top, ts);
+            drawJigsawEdge(ctx, x + ts, y, x + ts, y + ts, right, ts);
+            drawJigsawEdge(ctx, x + ts, y + ts, x, y + ts, bottom, ts);
+            drawJigsawEdge(ctx, x, y + ts, x, y, left, ts);
+            ctx.closePath();
+        }
+
+        function drawJigsawEdge(ctx, x1, y1, x2, y2, type, ts) {
+            if (type === 0) {
+                ctx.lineTo(x2, y2);
+                return;
+            }
+            const dx = x2 - x1, dy = y2 - y1;
+            const len = Math.hypot(dx, dy);
+            const cx = dx / len, cy = dy / len;
+            const nx = -cy, ny = cx;
+            
+            const w = len;
+            const th = ts * 0.28 * type;
+
+            ctx.bezierCurveTo(
+                x1 + cx * w * 0.2, y1 + cy * w * 0.2, 
+                x1 + cx * w * 0.3 + nx * th * 0.1, y1 + cy * w * 0.3 + ny * th * 0.1, 
+                x1 + cx * w * 0.4 + nx * th * 0.4, y1 + cy * w * 0.4 + ny * th * 0.4
+            );
+            ctx.bezierCurveTo(
+                x1 + cx * w * 0.3 + nx * th * 1.1, y1 + cy * w * 0.3 + ny * th * 1.1, 
+                x1 + cx * w * 0.7 + nx * th * 1.1, y1 + cy * w * 0.7 + ny * th * 1.1, 
+                x1 + cx * w * 0.6 + nx * th * 0.4, y1 + cy * w * 0.6 + ny * th * 0.4
+            );
+            ctx.bezierCurveTo(
+                x1 + cx * w * 0.7 + nx * th * 0.1, y1 + cy * w * 0.7 + ny * th * 0.1, 
+                x1 + cx * w * 0.8, y1 + cy * w * 0.8, 
+                x2, y2
+            );
+        }
+
+        /* Fallback coloured tiles when image fails */
+        const TILE_COLORS = ['#e10600', '#ff5c00', '#ffd700', '#00b4d8', '#06d6a0', '#8338ec', '#fb5607', '#3a86ff'];
+        function drawFallback(x, y, w, h, idx) {
+            const col = TILE_COLORS[idx % TILE_COLORS.length] || '#333';
+            ctx.fillStyle = col;
+            ctx.fillRect(x, y, w, h);
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.font = `bold ${Math.max(14, w * 0.35)}px Barlow Condensed`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(idx + 1, x + w / 2, y + h / 2);
+        }
+
+        /* Click handler */
+        canvas.addEventListener('click', e => {
+            if (solved) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = CSIZE / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+            const ts = CSIZE / gridX;
+            const col = Math.floor(mx / ts);
+            const row = Math.floor(my / ts);
+            const pos = row * gridX + col;
+
+            if (pos < 0 || pos >= pieces.length) return;
+
+            if (selected === null) {
+                selected = pos;
+            } else {
+                if (selected !== pos) {
+                    [pieces[selected], pieces[pos]] = [pieces[pos], pieces[selected]];
+                    moves++;
+                    updateHUD();
+                    checkWin();
+                }
+                selected = null;
+            }
+            drawBoard();
+        });
+
+        function updateHUD() {
+            const total = gridX * gridY;
+            const correct = pieces.filter((v, i) => v === i).length;
+            const pct = Math.round(correct / total * 100);
+            document.getElementById('hudMoves').textContent = moves;
+            document.getElementById('hudPieces').textContent = `${correct} / ${total}`;
+            document.getElementById('hudPct').textContent = `${pct}%`;
+            document.getElementById('progressFill').style.width = pct + '%';
+        }
+
+        function checkWin() {
+            if (pieces.every((v, i) => v === i)) {
+                solved = true;
+                clearInterval(timerInterval);
+                selected = null;
+                drawBoard();
+                document.getElementById('winTime').textContent = 'Time: ' + fmtTime(elapsed) + '  ·  Moves: ' + moves;
+                setTimeout(() => document.getElementById('winOverlay').classList.add('show'), 400);
+            }
+        }
+
+        /* Controls */
+        document.getElementById('gridSelect').addEventListener('change', initPuzzle);
+
+        document.getElementById('shuffleBtn').addEventListener('click', () => {
+            document.getElementById('shuffleBtn').classList.add('active');
+            setTimeout(() => document.getElementById('shuffleBtn').classList.remove('active'), 300);
+            initPuzzle();
+        });
+
+        document.getElementById('peekBtn').addEventListener('click', () => {
+            peeking = !peeking;
+            document.getElementById('peekBtn').classList.toggle('active', peeking);
+            drawBoard();
+        });
+
+        document.getElementById('solveBtn').addEventListener('click', () => {
+            pieces = pieces.map((_, i) => i);
+            selected = null;
+            updateHUD();
+            drawBoard();
+            clearInterval(timerInterval);
+            solved = true;
+            document.getElementById('winTime').textContent = 'Puzzle Auto-Solved!';
+            setTimeout(() => document.getElementById('winOverlay').classList.add('show'), 300);
+        });
+
+        /* Init on load */
+        loadImageAndInit();
+    </script>
+</body>
+
+</html>
